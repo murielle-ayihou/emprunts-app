@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import KineticTitle from '@/components/common/KineticTitle.vue'
+import { defineAsyncComponent } from 'vue'
+const Walker3D = defineAsyncComponent(() => import('@/components/three/Walker3D.vue'))
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getLesson, lessons } from '@/data/lessons'
-import { getChapter } from '@/data/chapters'
+import { getChapter, getPart } from '@/data/chapters'
 import { exercises } from '@/data/exercises'
 import { useProgressStore } from '@/stores/progress'
 import LessonBlock from '@/components/course/LessonBlock.vue'
-import ProgressBar from '@/components/common/ProgressBar.vue'
 import { ArrowLeft, ArrowRight, CheckCircle2, Clock, FileText, PencilLine, Undo2 } from 'lucide-vue-next'
 
 const props = defineProps<{ lessonId: string }>()
@@ -20,6 +22,7 @@ const prev = computed(() => (index.value > 0 ? lessons[index.value - 1] : null))
 const next = computed(() => (index.value >= 0 && index.value < lessons.length - 1 ? lessons[index.value + 1] : null))
 const done = computed(() => progress.isLessonCompleted(props.lessonId))
 const relatedExercises = computed(() => exercises.filter((e) => e.lessonId === props.lessonId).length)
+const part = computed(() => (chapter.value ? getPart(chapter.value.partId) : undefined))
 const posInChapter = computed(() => (chapter.value ? chapter.value.lessonIds.indexOf(props.lessonId) + 1 : 0))
 
 const reading = ref(0)
@@ -71,15 +74,15 @@ function completeAndNext() {
 
 <template>
   <div v-if="lesson && chapter" class="mx-auto max-w-[52rem]">
-    <div class="sticky top-[57px] z-30 -mx-4 mb-4 bg-paper/85 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6 lg:top-0 lg:-mx-10 lg:px-10">
-      <ProgressBar :value="reading" :height="3" color="var(--brass-bright)" label="Progression de lecture" />
+    <div class="sticky top-[57px] z-30 -mx-4 mb-4 border-b border-line/60 bg-paper/85 px-4 pt-1 backdrop-blur sm:-mx-6 sm:px-6 lg:top-0 lg:-mx-10 lg:px-10">
+      <Walker3D mode="scroll" :height="58" label="Bonhomme en 3D : il avance au fil de ta lecture" />
     </div>
 
-    <RouterLink to="/cours" class="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-soft hover:text-ink"><ArrowLeft :size="16" />Tous les chapitres</RouterLink>
+    <RouterLink :to="`/cours#titre-${part?.number ?? 1}`" class="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-soft hover:text-ink"><ArrowLeft :size="16" />{{ part ? `Titre ${part.number} : ${part.title}` : 'Tout le cours' }}</RouterLink>
 
     <header class="mt-5">
-      <p class="text-sm font-semibold text-capital">Chapitre {{ chapter.number }}, leçon {{ posInChapter }} sur {{ chapter.lessonIds.length }}</p>
-      <h1 class="mt-2 text-4xl font-bold sm:text-[2.75rem]">{{ lesson.title }}</h1>
+      <p class="text-sm font-semibold text-capital">Titre {{ part?.number }}, chapitre {{ chapter.number }} : {{ chapter.title }}<span class="font-normal text-muted"> (leçon {{ posInChapter }} sur {{ chapter.lessonIds.length }})</span></p>
+      <KineticTitle :key="lesson.id" class="mt-2" :text="lesson.title" size="lg" />
       <p class="mt-3 text-lg text-ink-soft">{{ lesson.summary }}</p>
       <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
         <span class="flex items-center gap-1.5"><Clock :size="15" />{{ lesson.minutes }} min</span>

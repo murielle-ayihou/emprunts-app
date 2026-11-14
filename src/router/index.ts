@@ -11,7 +11,8 @@ export const router = createRouter({
     { path: '/quiz', name: 'quizzes', component: () => import('@/views/QuizListView.vue'), meta: { title: 'Quiz' } },
     { path: '/quiz/:quizId', name: 'quiz', component: () => import('@/views/QuizView.vue'), props: true, meta: { title: 'Quiz' } },
     { path: '/quiz/:quizId/resultats/:attemptId', name: 'results', component: () => import('@/views/ResultsView.vue'), props: true, meta: { title: 'Résultats' } },
-    { path: '/simulateur', name: 'simulator', component: () => import('@/views/SimulatorView.vue'), meta: { title: 'Simulateur' } },
+    { path: '/simulateur', name: 'simulator', component: () => import('@/views/SimulatorView.vue'), meta: { title: 'Simulateurs' } },
+    { path: '/revision', name: 'flashcards', component: () => import('@/views/FlashcardsView.vue'), meta: { title: 'Révision flash' } },
     { path: '/memo', name: 'memo', component: () => import('@/views/MemoView.vue'), meta: { title: 'Mémo' } },
     { path: '/reglages', name: 'settings', component: () => import('@/views/SettingsView.vue'), meta: { title: 'Réglages' } },
     { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/views/NotFoundView.vue'), meta: { title: 'Page introuvable' } },
@@ -25,5 +26,5 @@ export const router = createRouter({
 
 router.afterEach((to) => {
   const t = to.meta.title as string | undefined
-  document.title = t ? `${t} · Échéance` : 'Échéance'
+  document.title = t ? `${t} | Cursus` : 'Cursus'
 })

@@ -4,7 +4,7 @@ import type { Activity, ActivityType, ExerciseResult, ProgressState, QuizAttempt
 import { STORAGE_KEYS, emptyProgress, readJson, removeKey, validateProgress, writeJson } from '@/services/storage'
 import { XP, completedChapterIds, dayKey, earnedBadges, levelFromXp, quizXp, studyDayStreak, DAILY_GOAL_XP } from '@/services/gamification'
 import { badges as badgeDefs } from '@/data/badges'
-import { chapters, getChapter } from '@/data/chapters'
+import { chapters, getChapter, getPart, parts } from '@/data/chapters'
 import { getLesson, lessons } from '@/data/lessons'
 import { exercises } from '@/data/exercises'
 import { quizQuestions } from '@/data/quizzes'
@@ -49,6 +49,20 @@ export const useProgressStore = defineStore('progress', () => {
     if (!ch) return 0
     return ch.lessonIds.filter((id) => state.value.lessonsCompleted.includes(id)).length / ch.lessonIds.length
   }
+
+  function partProgress(partId: string) {
+    const part = getPart(partId)
+    if (!part) return 0
+    const ids = chapters.filter((c) => c.partId === partId).flatMap((c) => c.lessonIds)
+    return ids.length ? ids.filter((id) => state.value.lessonsCompleted.includes(id)).length / ids.length : 0
+  }
+
+  function partMastery(partId: string): number | null {
+    const vals = chapters.filter((c) => c.partId === partId).map((c) => chapterMastery(c.id)).filter((m): m is number => m !== null)
+    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null
+  }
+
+  const partsList = parts
 
   function isLessonCompleted(id: string) {
     return state.value.lessonsCompleted.includes(id)
@@ -260,6 +274,9 @@ export const useProgressStore = defineStore('progress', () => {
     nextLesson,
     chapterProgress,
     chapterMastery,
+    partProgress,
+    partMastery,
+    partsList,
     isLessonCompleted,
     visitLesson,
     setPosition,

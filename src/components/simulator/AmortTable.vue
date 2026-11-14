@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import type { LoanSchedule } from '@/services/loan'
+import { PERIOD_LABELS, type LoanSchedule } from '@/services/loan'
 import { formatAmount, yearLabel } from '@/utils/format'
 
-defineProps<{ schedule: LoanSchedule; selected?: number }>()
+const props = defineProps<{ schedule: LoanSchedule; selected?: number }>()
+const k = props.schedule.params.periodsPerYear ?? 1
+function label(p: number) {
+  return k === 1 ? yearLabel(p) : `an ${Math.ceil(p / k)}`
+}
 const emit = defineEmits<{ select: [period: number] }>()
 </script>
 
@@ -15,7 +19,7 @@ const emit = defineEmits<{ select: [period: number] }>()
           <th scope="col" class="px-3 py-3 text-right font-semibold">Capital restant dû (début)</th>
           <th scope="col" class="px-3 py-3 text-right font-semibold text-interest">Intérêts</th>
           <th scope="col" class="px-3 py-3 text-right font-semibold text-capital">Amortissement</th>
-          <th scope="col" class="px-3 py-3 text-right font-semibold">Annuité</th>
+          <th scope="col" class="px-3 py-3 text-right font-semibold">{{ PERIOD_LABELS[schedule.params.periodsPerYear ?? 1].payment }}</th>
           <th scope="col" class="px-3 py-3 text-right font-semibold">Capital restant dû (fin)</th>
         </tr>
       </thead>
@@ -30,7 +34,7 @@ const emit = defineEmits<{ select: [period: number] }>()
           @click="emit('select', r.period)"
           @keydown.enter.space.prevent="emit('select', r.period)"
         >
-          <td class="px-3 py-2.5 font-semibold">{{ r.period }} <span class="font-normal text-muted">({{ yearLabel(r.period) }})</span></td>
+          <td class="px-3 py-2.5 font-semibold">{{ r.period }} <span class="font-normal text-muted">({{ label(r.period) }})</span></td>
           <td class="px-3 py-2.5 text-right">{{ formatAmount(r.startBalance) }}</td>
           <td class="px-3 py-2.5 text-right text-interest">{{ formatAmount(r.interest) }}</td>
           <td class="px-3 py-2.5 text-right text-capital">{{ formatAmount(r.principal) }}</td>

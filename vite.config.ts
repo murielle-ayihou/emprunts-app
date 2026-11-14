@@ -14,14 +14,14 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ['favicon.svg', 'icons/*.png'],
       manifest: {
-        name: 'Échéance — Apprendre les emprunts',
-        short_name: 'Échéance',
-        description: 'Cours interactif sur les emprunts bancaires : cours, exercices, quiz et simulateur.',
+        name: 'Cursus — Réviser autrement',
+        short_name: 'Cursus',
+        description: 'Cours interactifs, exercices, quiz et simulateurs. Première matière : comptabilité financière.',
         lang: 'fr',
         start_url: '/',
         scope: '/',
         display: 'standalone',
-        background_color: '#F6F4EF',
+        background_color: '#F3F5F2',
         theme_color: '#14284B',
         icons: [
           { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },

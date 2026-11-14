@@ -10,6 +10,15 @@ import FinancingDiagram from './FinancingDiagram.vue'
 import PaymentSplitDiagram from './PaymentSplitDiagram.vue'
 import MethodsDiagram from './MethodsDiagram.vue'
 import MethodsChart from './MethodsChart.vue'
+import TAccount from './TAccount.vue'
+import ComptaProcess from './diagrams/ComptaProcess.vue'
+import FluxEchange from './diagrams/FluxEchange.vue'
+import BilanSchema from './diagrams/BilanSchema.vue'
+import TvaChain from './diagrams/TvaChain.vue'
+import PaieSchema from './diagrams/PaieSchema.vue'
+import PaieCalendrier from './diagrams/PaieCalendrier.vue'
+import ImmoPhases from './diagrams/ImmoPhases.vue'
+import PeriodiciteChart from './diagrams/PeriodiciteChart.vue'
 import { AlertTriangle, Lightbulb, FileWarning } from 'lucide-vue-next'
 
 defineProps<{ block: LessonBlock }>()
@@ -75,6 +84,10 @@ defineProps<{ block: LessonBlock }>()
   </section>
 
   <JournalEntry v-else-if="block.type === 'journal'" :entry="block.entry" :title="block.title" />
+  <TAccount v-else-if="block.type === 'taccount'" :account="block.account" />
+  <ul v-else-if="block.type === 'list'" class="prose-lesson list-disc space-y-1 pl-6">
+    <li v-for="(it, i) in block.items" :key="i"><RichText :text="it" tag="span" /></li>
+  </ul>
   <QuickCheck v-else-if="block.type === 'quickcheck'" :check="block.check" />
 
   <template v-else-if="block.type === 'diagram'">
@@ -82,5 +95,13 @@ defineProps<{ block: LessonBlock }>()
     <PaymentSplitDiagram v-else-if="block.kind === 'payment-split'" />
     <MethodsDiagram v-else-if="block.kind === 'methods'" />
     <MethodsChart v-else-if="block.kind === 'methods-chart'" />
+    <ComptaProcess v-else-if="block.kind === 'compta-process'" />
+    <FluxEchange v-else-if="block.kind === 'flux-echange'" />
+    <BilanSchema v-else-if="block.kind === 'bilan-schema'" />
+    <TvaChain v-else-if="block.kind === 'tva-chain'" />
+    <PaieSchema v-else-if="block.kind === 'paie-schema'" />
+    <PaieCalendrier v-else-if="block.kind === 'paie-calendrier'" />
+    <ImmoPhases v-else-if="block.kind === 'immo-phases'" />
+    <PeriodiciteChart v-else-if="block.kind === 'periodicite-chart'" />
   </template>
 </template>

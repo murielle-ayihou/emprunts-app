@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import KineticTitle from '@/components/common/KineticTitle.vue'
 import { ref } from 'vue'
 import { useSettingsStore } from '@/stores/settings'
 import { useProgressStore } from '@/stores/progress'
@@ -30,7 +31,7 @@ function exportProgress() {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
-  a.download = `echeance-progression-${new Date().toISOString().slice(0, 10)}.json`
+  a.download = `cursus-progression-${new Date().toISOString().slice(0, 10)}.json`
   a.click()
   URL.revokeObjectURL(a.href)
   ui.toast('Sauvegarde téléchargée.', 'success')
@@ -41,7 +42,7 @@ async function onFile(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
   if (file.size > 2_000_000) {
-    importErrors.value = ['Le fichier est trop volumineux pour être une sauvegarde Échéance.']
+    importErrors.value = ['Le fichier est trop volumineux pour être une sauvegarde Cursus.']
     return
   }
   const res = parseImport(await file.text())
@@ -67,7 +68,7 @@ function doReset() {
 
 <template>
   <div class="mx-auto max-w-3xl">
-    <h1 class="text-4xl font-bold sm:text-5xl">Réglages</h1>
+    <KineticTitle text="Réglages" />
 
     <section class="panel mt-8 p-6">
       <h2 class="text-xl font-semibold">Apparence</h2>

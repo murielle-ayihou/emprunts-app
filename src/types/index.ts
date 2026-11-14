@@ -2,8 +2,31 @@
 
 export type Level = 'debutant' | 'intermediaire' | 'avance'
 
+export interface Subject {
+  id: string
+  title: string
+  short: string
+  level: string
+  partIds: string[]
+}
+
+/** Un « Titre » du cours (grande partie) */
+export interface Part {
+  id: string
+  subjectId: string
+  number: number
+  title: string
+  subtitle: string
+  chapterIds: string[]
+  /** Fichiers sources utilisés */
+  sources: string[]
+  /** Remarque sur les sources (parties manquantes…) */
+  sourceNote?: string
+}
+
 export interface Chapter {
   id: string
+  partId: string
   number: number
   title: string
   subtitle: string
@@ -25,7 +48,8 @@ export interface Formula {
   latex: string
   variables: FormulaVariable[]
   whenToUse: string
-  sourcePage: number
+  /** Numéro de diapositive, ou texte (« TD n°5 ») */
+  sourcePage: number | string
 }
 
 export interface TableData {
@@ -62,7 +86,19 @@ export interface Example {
   sourcePage?: number
 }
 
-export type DiagramKind = 'financing' | 'payment-split' | 'methods' | 'methods-chart'
+export type DiagramKind =
+  | 'financing'
+  | 'payment-split'
+  | 'methods'
+  | 'methods-chart'
+  | 'compta-process'
+  | 'flux-echange'
+  | 'bilan-schema'
+  | 'tva-chain'
+  | 'paie-schema'
+  | 'paie-calendrier'
+  | 'immo-phases'
+  | 'periodicite-chart'
 
 export interface QuickCheck {
   question: string
@@ -86,6 +122,16 @@ export type LessonBlock =
   | { type: 'journal'; title?: string; entry: JournalEntry }
   | { type: 'quickcheck'; check: QuickCheck }
   | { type: 'heading'; text: string }
+  | { type: 'taccount'; account: TAccountData }
+  | { type: 'list'; items: string[] }
+
+export interface TAccountData {
+  title: string
+  debits: { label: string; amount: number }[]
+  credits: { label: string; amount: number }[]
+  /** Solde initial débiteur (s'affiche en premier côté débit) */
+  caption?: string
+}
 
 export interface Lesson {
   id: string
@@ -114,6 +160,8 @@ export type ExerciseInput =
   | { id: string; type: 'text'; label: string; answers: string[] }
 
 export interface Exercise {
+  /** Origine : « TD n°1, exercice 2 », « Exemple du cours, diapositive 98 »… */
+  source?: string
   id: string
   chapterId: string
   lessonId: string

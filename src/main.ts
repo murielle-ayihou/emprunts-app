@@ -8,6 +8,6 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.config.errorHandler = (err) => {
-  console.error('[Échéance]', err)
+  console.error('[Cursus]', err)
 }
 app.mount('#app')

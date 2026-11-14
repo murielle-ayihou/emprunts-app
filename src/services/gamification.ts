@@ -1,5 +1,5 @@
 import type { ProgressState } from '@/types'
-import { chapters } from '@/data/chapters'
+import { chapters, parts } from '@/data/chapters'
 import { lessons } from '@/data/lessons'
 import { exercises } from '@/data/exercises'
 
@@ -107,6 +107,11 @@ export function earnedBadges(state: ProgressState): string[] {
   if (state.simulatorComparisons >= 1) out.push('simulateur')
   if (studyDayStreak(state.studyDays) >= 3) out.push('assidu')
   if (lessons.every((l) => state.lessonsCompleted.includes(l.id))) out.push('diplome')
+  const partLessons = (pid: string) => chapters.filter((c) => c.partId === pid).flatMap((c) => c.lessonIds)
+  if (parts.some((p) => partLessons(p.id).every((id) => state.lessonsCompleted.includes(id)))) out.push('titre-boucle')
+  const chapterPart = new Map(chapters.map((c) => [c.id, c.partId]))
+  const partsWithSuccess = new Set(exercises.filter((e) => state.exerciseResults[e.id]?.correct).map((e) => chapterPart.get(e.chapterId)))
+  if (parts.every((p) => partsWithSuccess.has(p.id))) out.push('polyvalent')
   return out
 }
 

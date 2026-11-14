@@ -8,16 +8,23 @@ import type { ProgressState, SettingsState } from '@/types'
  */
 
 export const STORAGE_KEYS = {
-  progress: 'echeance:progress',
-  settings: 'echeance:settings',
+  progress: 'cursus:progress',
+  settings: 'cursus:settings',
 } as const
 
-export const EXPORT_APP_ID = 'echeance'
+/** Clés de l'ancienne version « Échéance » : relues une fois pour ne pas perdre la progression. */
+const LEGACY_KEYS: Record<string, string> = {
+  'cursus:progress': 'echeance:progress',
+  'cursus:settings': 'echeance:settings',
+}
+
+export const EXPORT_APP_ID = 'cursus'
+const ACCEPTED_APP_IDS = ['cursus', 'echeance']
 export const EXPORT_VERSION = 1
 
 export function readJson<T>(key: string): T | null {
   try {
-    const raw = localStorage.getItem(key)
+    const raw = localStorage.getItem(key) ?? (LEGACY_KEYS[key] ? localStorage.getItem(LEGACY_KEYS[key]) : null)
     return raw ? (JSON.parse(raw) as T) : null
   } catch {
     return null
@@ -137,11 +144,11 @@ export function parseImport(text: string): ValidationResult<ExportFile> {
     return { ok: false, errors: ["Le fichier n'est pas un JSON valide."] }
   }
   if (!isObj(data)) return { ok: false, errors: ['Format de sauvegarde non reconnu.'] }
-  if (data.app !== EXPORT_APP_ID) return { ok: false, errors: ["Ce fichier ne provient pas de l'application Échéance."] }
+  if (!ACCEPTED_APP_IDS.includes(data.app as string)) return { ok: false, errors: ["Ce fichier ne provient pas de l'application Cursus."] }
   if (data.version !== EXPORT_VERSION) return { ok: false, errors: [`Version de sauvegarde non prise en charge (${String(data.version)}).`] }
   const pr = validateProgress(data.progress)
   const st = validateSettings(data.settings)
   const errors = [...pr.errors, ...st.errors]
   if (errors.length) return { ok: false, errors }
-  return { ok: true, value: data as unknown as ExportFile, errors: [] }
+  return { ok: true, value: { ...(data as unknown as ExportFile), app: EXPORT_APP_ID }, errors: [] }
 }

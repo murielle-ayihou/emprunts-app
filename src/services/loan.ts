@@ -8,7 +8,9 @@
  *  - Amortissement constant : Amortissement = Capital emprunté / nombre d'échéances
  *  - Annuité constante    : Annuité = Capital × i / (1 − (1 + i)^−n)
  *
- * Le cours ne présente que des échéances annuelles à taux fixe : c'est le cadre retenu ici.
+ * Périodicité (TD n°5, exercice 2) : pour des échéances mensuelles, trimestrielles ou semestrielles,
+ * on utilise le taux équivalent i_k = (1 + i)^(1/k) − 1, et n = durée × k échéances.
+ * La correction du TD arrondit ce taux à 3 décimales en % (0,407 % ; 1,227 %) : option « td ».
  *
  * Arrondis : tous les montants sont arrondis au centime à chaque ligne (comme dans le cours).
  * La dernière ligne rembourse exactement le capital restant dû ; l'écart d'arrondi accumulé
@@ -25,6 +27,26 @@ export interface LoanParams {
   /** Durée en années (= nombre d'échéances annuelles) */
   years: number
   method: LoanMethod
+  /** Nombre d'échéances par an : 1 (annuelle, par défaut), 2, 4 ou 12 */
+  periodsPerYear?: PeriodsPerYear
+  /** « exact » (par défaut) ou « td » : taux périodique arrondi à 3 décimales en %, comme la correction du TD n°5 */
+  rateRounding?: 'exact' | 'td'
+}
+
+export type PeriodsPerYear = 1 | 2 | 4 | 12
+
+export const PERIOD_LABELS: Record<PeriodsPerYear, { adj: string; payment: string }> = {
+  1: { adj: 'Annuelle', payment: 'Annuité' },
+  2: { adj: 'Semestrielle', payment: 'Semestrialité' },
+  4: { adj: 'Trimestrielle', payment: 'Trimestrialité' },
+  12: { adj: 'Mensuelle', payment: 'Mensualité' },
+}
+
+/** Taux périodique équivalent, en % : (1 + i)^(1/k) − 1. */
+export function periodicRatePercent(annualPercent: number, k: PeriodsPerYear, rounding: 'exact' | 'td' = 'exact'): number {
+  if (k === 1) return annualPercent
+  const r = (Math.pow(1 + annualPercent / 100, 1 / k) - 1) * 100
+  return rounding === 'td' ? Math.round(r * 1000) / 1000 : r
 }
 
 export interface LoanRow {
@@ -47,6 +69,10 @@ export interface LoanSchedule {
   constantPayment: number | null
   /** Écart d'arrondi reporté sur la dernière échéance (en euros, peut être 0) */
   lastPaymentAdjustment: number
+  /** Taux appliqué à chaque échéance, en % */
+  periodRatePercent: number
+  /** Nombre total d'échéances */
+  periods: number
 }
 
 export const METHOD_LABELS: Record<LoanMethod, string> = {
@@ -108,6 +134,9 @@ export function validateParams(p: LoanParams): string[] {
   if (!Number.isInteger(p.years) || p.years < LIMITS.yearsMin || p.years > LIMITS.yearsMax) {
     errors.push(`La durée doit être un nombre entier d'années entre ${LIMITS.yearsMin} et ${LIMITS.yearsMax}.`)
   }
+  if (p.periodsPerYear !== undefined && ![1, 2, 4, 12].includes(p.periodsPerYear)) {
+    errors.push('La périodicité doit être annuelle, semestrielle, trimestrielle ou mensuelle.')
+  }
   return errors
 }
 
@@ -115,15 +144,18 @@ export function buildSchedule(params: LoanParams): LoanSchedule {
   const errors = validateParams(params)
   if (errors.length) throw new Error(errors.join(' '))
 
-  const { capital, ratePercent, years, method } = params
+  const { capital, years, method } = params
+  const k = params.periodsPerYear ?? 1
+  const ratePercent = periodicRatePercent(params.ratePercent, k, params.rateRounding ?? 'exact')
+  const n = years * k
   const rows: LoanRow[] = []
   let balanceCents = toCents(capital)
 
-  const regularAnnuityCents = method === 'annuite-constante' ? toCents(constantAnnuity(capital, ratePercent, years)) : 0
-  const regularPrincipalCents = method === 'amortissement-constant' ? toCents(constantPrincipal(capital, years)) : 0
+  const regularAnnuityCents = method === 'annuite-constante' ? toCents(constantAnnuity(capital, ratePercent, n)) : 0
+  const regularPrincipalCents = method === 'amortissement-constant' ? toCents(constantPrincipal(capital, n)) : 0
 
-  for (let period = 1; period <= years; period++) {
-    const isLast = period === years
+  for (let period = 1; period <= n; period++) {
+    const isLast = period === n
     const startCents = balanceCents
     const interestCents = toCents(periodicInterest(fromCents(startCents), ratePercent))
 
@@ -133,7 +165,8 @@ export function buildSchedule(params: LoanParams): LoanSchedule {
     } else if (method === 'in-fine') {
       principalCents = 0
     } else if (method === 'amortissement-constant') {
-      principalCents = regularPrincipalCents
+      // Parts égales réparties au centime près : le cumul suit C × p / n (comme la correction du TD n°5)
+      principalCents = Math.round((toCents(capital) * period) / n) - Math.round((toCents(capital) * (period - 1)) / n)
     } else {
       principalCents = regularAnnuityCents - interestCents
     }
@@ -160,11 +193,11 @@ export function buildSchedule(params: LoanParams): LoanSchedule {
   const last = rows[rows.length - 1]
 
   let lastPaymentAdjustment = 0
-  if (method === 'annuite-constante' && years > 1) {
+  if (method === 'annuite-constante' && n > 1) {
     lastPaymentAdjustment = roundCents(last.payment - fromCents(regularAnnuityCents))
-  } else if (method === 'amortissement-constant' && years > 1) {
+  } else if (method === 'amortissement-constant' && n > 1) {
     lastPaymentAdjustment = roundCents(last.principal - fromCents(regularPrincipalCents))
   }
 
-  return { params, rows, totalInterest, totalPrincipal, totalPaid, constantPayment, lastPaymentAdjustment }
+  return { params, rows, totalInterest, totalPrincipal, totalPaid, constantPayment, lastPaymentAdjustment, periodRatePercent: ratePercent, periods: n }
 }

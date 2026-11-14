@@ -8,7 +8,7 @@ const props = defineProps<{ schedule: LoanSchedule }>()
 const crdCanvas = ref<HTMLCanvasElement | null>(null)
 const payCanvas = ref<HTMLCanvasElement | null>(null)
 const pieCanvas = ref<HTMLCanvasElement | null>(null)
-const labels = () => props.schedule.rows.map((r) => yearLabel(r.period))
+const labels = () => props.schedule.rows.map((r) => ((props.schedule.params.periodsPerYear ?? 1) === 1 ? yearLabel(r.period) : `n°${r.period}`))
 const euroTick = (v: string | number) => {
   const n = Number(v)
   return Math.abs(n) >= 1000 ? `${(n / 1000).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} k€` : `${n} €`
@@ -69,7 +69,7 @@ useChart(pieCanvas, () => ({
   <div class="grid gap-5 lg:grid-cols-5">
     <figure class="panel p-5 lg:col-span-3">
       <figcaption class="font-semibold">Évolution des remboursements</figcaption>
-      <p class="text-sm text-muted">Chaque barre est une annuité : capital remboursé et intérêts.</p>
+      <p class="text-sm text-muted">Chaque barre est une échéance : capital remboursé et intérêts.</p>
       <div class="mt-4 h-64"><canvas ref="payCanvas" role="img" aria-label="Annuités par année, découpées en amortissement et intérêts" /></div>
     </figure>
     <figure class="panel p-5 lg:col-span-2">

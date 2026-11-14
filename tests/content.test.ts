@@ -178,3 +178,47 @@ describe('Lecture des réponses', () => {
     expect(a).toEqual([1, 2, 3, 4, 5, 6])
   })
 })
+
+import { liquidate, tvaFromHT, htFromTTC } from '@/services/tva'
+import { linearPlan, residualValue, impairmentTest, disposal, acquisitionCost } from '@/services/immo'
+import { computePay } from '@/services/paie'
+
+describe('Réponses des Titres 1 à 3 vérifiées par les moteurs', () => {
+  const ans = (id: string, input = 'a') => {
+    const inp = exercises.find((e) => e.id === id)!.inputs.find((i) => i.id === input)!
+    return inp.type === 'number' ? inp.answer : NaN
+  }
+  it('Titre 1', () => {
+    expect(ans('ex-t1-06', 'b')).toBe(4226 + 4000 - 2100)
+    expect(ans('ex-t1-07')).toBe(826 + 1000 + 1829 - (65 + 94 + 124 + 1500))
+    expect(ans('ex-t1-08', 'c')).toBe(2660 + 84_000 + 50_400 + 67_200 - (68_530 + 14_000 + 60_865))
+    const actif = 82_000 + 320_000 + 87_500 + 6400 + 11_000 + 9800 + 53_000 + 38_000 + 1800
+    expect(ans('ex-t1-10', 'a')).toBe(actif)
+    expect(ans('ex-t1-10', 'b')).toBe(actif - (250_000 + 80_000 + 109_400 + 153_000))
+  })
+  it('Titre 2', () => {
+    expect(ans('ex-t2-01', 'a')).toBe(tvaFromHT(5300, 20))
+    expect(ans('ex-t2-02', 'a')).toBe(htFromTTC(54_508.56, 20))
+    const r = liquidate({ collectee: ans('ex-t2-04', 'a'), deductibleImmo: 0, deductibleBS: 4950 })
+    expect(ans('ex-t2-04', 'b')).toBe(r.solde)
+    expect(ans('ex-t2-04', 'c')).toBe(r.aDecaisser)
+    expect(ans('ex-t2-06')).toBe(liquidate({ collectee: 40_000, deductibleImmo: 0, deductibleBS: 35_493.45 }).aDecaisser)
+    expect(ans('ex-t2-10', 'b')).toBe(tvaFromHT(13_400, 20))
+    const p = computePay({ brut: 4500, cotisationsSalariales: 999.24, pas: 257.79, cotisationsPatronales: 1836.4 })
+    expect(ans('ex-t2-13', 'b')).toBe(p.netPaye)
+    expect(ans('ex-t2-13', 'c')).toBe(p.coutTotal)
+    expect(ans('ex-t2-14', 'a')).toBe(15_000 - 2500 - 1300)
+  })
+  it('Titre 3', () => {
+    const p = linearPlan({ cout: 4500, valeurResiduelle: 0, dureeAnnees: 5, moisMiseEnService: 6, milieuDeMois: true, rounding: 'cent' })
+    expect([ans('ex-t3-02', 'b'), ans('ex-t3-02', 'c'), ans('ex-t3-02', 'd')]).toEqual([p[0].dotation, p[1].dotation, p[5].dotation])
+    const vr = residualValue(6400, 5)
+    expect(ans('ex-t3-04', 'a')).toBe(vr)
+    expect(ans('ex-t3-04', 'c')).toBe(linearPlan({ cout: 32_000, valeurResiduelle: vr, dureeAnnees: 3, moisMiseEnService: 7, milieuDeMois: false, rounding: 'cent' })[0].dotation)
+    expect(ans('ex-t3-05', 'b')).toBe(impairmentTest({ vnc: 180_000, valeurVenale: 195_000, valeurUsage: 0, depreciationsAnterieures: 20_000 }).amount)
+    expect(ans('ex-t3-07', 'a')).toBe(acquisitionCost({ prixAchat: 10_000, remisePct: 5, fraisDirects: 900, fraisAcquisition: 1000, methodeReference: true }).cout)
+    const d = disposal({ valeurBrute: 25_000, amortCumulDebut: 15_000, dotationComplementaire: 2500, prixCessionHT: 6000, tauxTVA: 20, paiementDiffere: true, compteImmo: '218 2', libelleImmo: '', compteAmort: '281 82', libelleAmort: '' })
+    expect(ans('ex-t3-09', 'b')).toBe(d.vnc)
+    expect(ans('ex-t3-09', 'd')).toBe(d.resultat)
+  })
+})

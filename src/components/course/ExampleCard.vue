@@ -14,8 +14,8 @@ const showSteps = ref(true)
 <template>
   <section v-if="ex" class="rounded-[20px] bg-surface-2/60 p-5 sm:p-6" :aria-label="ex.title">
     <div class="flex items-baseline justify-between gap-3">
-      <h3 class="text-lg font-semibold">Exemple du cours</h3>
-      <span v-if="ex.sourcePage" class="shrink-0 text-xs text-muted">Cours p. {{ ex.sourcePage }}</span>
+      <h3 class="text-lg font-semibold">{{ ex.sourcePage ? 'Exemple du cours' : 'Exemple du TD' }}</h3>
+      <span v-if="ex.sourcePage" class="shrink-0 text-xs text-muted">Diapositive {{ ex.sourcePage }}</span>
     </div>
     <RichText :text="ex.statement" class="mt-2 text-ink-soft" />
 

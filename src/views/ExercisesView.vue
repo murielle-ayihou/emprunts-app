@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import KineticTitle from '@/components/common/KineticTitle.vue'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { exercises } from '@/data/exercises'
-import { chapters } from '@/data/chapters'
+import { chapters, parts } from '@/data/chapters'
 import { getLesson } from '@/data/lessons'
 import { useProgressStore } from '@/stores/progress'
 import type { Level } from '@/types'
@@ -16,13 +17,19 @@ const progress = useProgressStore()
 
 type StatusFilter = 'tous' | 'a-faire' | 'a-retravailler' | 'reussis'
 
+const part = ref<string>((route.query.titre as string) ?? (route.query.chapitre ? chapters.find((c) => c.id === route.query.chapitre)?.partId ?? 'tous' : 'tous'))
 const chapter = ref<string>((route.query.chapitre as string) ?? 'tous')
+const chaptersOfPart = computed(() => chapters.filter((c) => part.value === 'tous' || c.partId === part.value))
+watch(part, () => {
+  if (chapter.value !== 'tous' && !chaptersOfPart.value.some((c) => c.id === chapter.value)) chapter.value = 'tous'
+})
 const level = ref<Level | 'tous'>((route.query.niveau as Level) ?? 'tous')
 const status = ref<StatusFilter>((route.query.statut as StatusFilter) ?? 'tous')
 const lesson = ref<string | null>((route.query.lecon as string) ?? null)
 
-watch([chapter, level, status, lesson], () => {
+watch([part, chapter, level, status, lesson], () => {
   const q: Record<string, string> = {}
+  if (part.value !== 'tous') q.titre = part.value
   if (chapter.value !== 'tous') q.chapitre = chapter.value
   if (level.value !== 'tous') q.niveau = level.value
   if (status.value !== 'tous') q.statut = status.value
@@ -33,6 +40,7 @@ watch([chapter, level, status, lesson], () => {
 const filtered = computed(() =>
   exercises.filter((e) => {
     if (lesson.value && e.lessonId !== lesson.value) return false
+    if (part.value !== 'tous' && chapters.find((c) => c.id === e.chapterId)?.partId !== part.value) return false
     if (chapter.value !== 'tous' && e.chapterId !== chapter.value) return false
     if (level.value !== 'tous' && e.level !== level.value) return false
     const r = progress.state.exerciseResults[e.id]
@@ -50,6 +58,7 @@ const toReview = computed(() => exercises.filter((e) => {
 
 function startChallenge() {
   lesson.value = null
+  part.value = 'tous'
   chapter.value = 'tous'
   level.value = 'tous'
   status.value = 'a-retravailler'
@@ -72,8 +81,8 @@ const statuses: { id: StatusFilter; label: string }[] = [
 <template>
   <div class="mx-auto max-w-[46rem]">
     <header>
-      <h1 class="text-4xl font-bold sm:text-5xl">Exercices</h1>
-      <p class="mt-3 text-lg text-ink-soft">{{ exercises.length }} exercices liés aux leçons, du plus simple au plus exigeant. Chaque correction détaille le calcul.</p>
+      <KineticTitle text="Exercices" />
+      <p class="mt-3 text-lg text-ink-soft">{{ exercises.length }} exercices liés aux leçons, dont ceux de tes TD et corrections. Du plus simple au plus exigeant, chaque correction détaille le calcul.</p>
       <div class="mt-5 flex items-center gap-4">
         <ProgressBar class="max-w-xs" :value="progress.exercisesCorrect / exercises.length" label="Exercices réussis" />
         <span class="num shrink-0 text-sm text-muted">{{ progress.exercisesCorrect }} / {{ exercises.length }} réussis</span>
@@ -94,11 +103,16 @@ const statuses: { id: StatusFilter; label: string }[] = [
         <span class="text-muted">Leçon :</span>
         <span class="chip bg-deep text-on-deep !py-1">{{ getLesson(lesson)?.title }}<button class="ml-1" aria-label="Retirer le filtre de leçon" @click="lesson = null"><X :size="14" /></button></span>
       </div>
-      <div class="flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Filtrer par chapitre">
-        <button class="shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition" :class="chapter === 'tous' ? 'border-ink bg-deep text-on-deep' : 'border-line bg-surface text-ink-soft hover:border-ink/40'" :aria-pressed="chapter === 'tous'" @click="chapter = 'tous'">Tous les chapitres</button>
-        <button v-for="c in chapters" :key="c.id" class="shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition" :class="chapter === c.id ? 'border-ink bg-deep text-on-deep' : 'border-line bg-surface text-ink-soft hover:border-ink/40'" :aria-pressed="chapter === c.id" @click="chapter = c.id">{{ c.number }}. {{ c.title }}</button>
+      <div class="flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Filtrer par Titre">
+        <button class="shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition" :class="part === 'tous' ? 'border-deep bg-deep text-on-deep' : 'border-line bg-surface text-ink-soft hover:border-ink/40'" :aria-pressed="part === 'tous'" @click="part = 'tous'">Tous les Titres</button>
+        <button v-for="p in parts" :key="p.id" class="shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition" :class="part === p.id ? 'border-deep bg-deep text-on-deep' : 'border-line bg-surface text-ink-soft hover:border-ink/40'" :aria-pressed="part === p.id" @click="part = p.id">Titre {{ p.number }}</button>
       </div>
       <div class="flex flex-wrap gap-3">
+        <label class="sr-only" for="f-chapter">Chapitre</label>
+        <select id="f-chapter" v-model="chapter" class="field !w-auto max-w-full !py-2 text-sm">
+          <option value="tous">Tous les chapitres</option>
+          <option v-for="c in chaptersOfPart" :key="c.id" :value="c.id">{{ part === 'tous' ? `T${parts.find((p) => p.id === c.partId)?.number}.${c.number}` : `${c.number}.` }} {{ c.title }}</option>
+        </select>
         <label class="sr-only" for="f-level">Niveau</label>
         <select id="f-level" v-model="level" class="field !w-auto !py-2 text-sm">
           <option v-for="l in levels" :key="l.id" :value="l.id">{{ l.label }}</option>

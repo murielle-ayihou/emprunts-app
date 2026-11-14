@@ -11,10 +11,11 @@ const progress = useProgressStore()
 </script>
 
 <template>
-  <aside class="sticky top-0 hidden h-dvh w-[260px] shrink-0 flex-col border-r border-line bg-surface/60 px-4 py-5 backdrop-blur lg:flex">
-    <RouterLink to="/" class="rounded-xl px-2 py-1" aria-label="Échéance, retour au tableau de bord"><AppLogo /></RouterLink>
+  <aside class="sidebar sticky top-0 hidden h-dvh w-[260px] shrink-0 flex-col overflow-y-auto overscroll-contain border-r border-line bg-surface/60 px-4 py-5 backdrop-blur lg:flex">
+    <RouterLink to="/" class="rounded-xl px-2 py-1" aria-label="Cursus, retour au tableau de bord"><AppLogo /></RouterLink>
 
-    <nav class="mt-8 flex flex-col gap-1" aria-label="Navigation principale">
+    <p class="mt-6 px-3 text-xs text-muted">Matière : <span class="font-semibold text-ink-soft">Comptabilité financière</span></p>
+    <nav class="mt-3 flex flex-col gap-1" aria-label="Navigation principale">
       <RouterLink
         v-for="item in navItems"
         :key="item.to"
@@ -28,7 +29,7 @@ const progress = useProgressStore()
       </RouterLink>
     </nav>
 
-    <div class="mt-auto space-y-3">
+    <div class="mt-auto space-y-3 pt-6">
       <RouterLink to="/" class="block rounded-2xl border border-line bg-surface p-4 transition hover:border-brass/60">
         <div class="flex items-baseline justify-between">
           <span class="font-display text-lg font-semibold">Niveau {{ progress.level.level }}</span>
@@ -44,3 +45,7 @@ const progress = useProgressStore()
     </div>
   </aside>
 </template>
+
+<style scoped>
+.sidebar { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+</style>

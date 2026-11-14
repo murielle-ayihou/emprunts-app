@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/archivo/wdth.css';
 @import '@fontsource-variable/manrope';
 @import 'katex/dist/katex.min.css';
 
@@ -61,7 +61,7 @@
 }
 
 @theme inline {
-  --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Manrope Variable', ui-sans-serif, system-ui, sans-serif;
 
   --color-paper: var(--paper);
@@ -101,9 +101,9 @@
   h3,
   h4 {
     @apply font-display text-ink;
-    letter-spacing: -0.015em;
-    line-height: 1.15;
-    font-variation-settings: 'opsz' 48;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    font-variation-settings: 'wdth' 108;
   }
   :focus-visible {
     outline: 2.5px solid var(--focus);

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import KineticTitle from '@/components/common/KineticTitle.vue'
 import { computed } from 'vue'
 import { quizSeries } from '@/data/quizzes'
 import { useProgressStore } from '@/stores/progress'
@@ -21,7 +22,7 @@ function attemptsOf(id: string) {
   <div class="mx-auto max-w-4xl">
     <header class="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 class="text-4xl font-bold sm:text-5xl">Quiz</h1>
+        <KineticTitle text="Quiz" />
         <p class="mt-3 max-w-xl text-lg text-ink-soft">Questions mélangées, une à la fois, avec correction à chaque réponse et un bilan détaillé à la fin.</p>
       </div>
       <label class="flex cursor-pointer items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3">

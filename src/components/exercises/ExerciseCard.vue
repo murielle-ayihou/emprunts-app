@@ -86,6 +86,7 @@ function expected(inp: Exercise['inputs'][number]): string {
       <LevelBadge :level="exercise.level" />
       <span class="chip bg-surface-2 text-ink-soft">{{ KIND_LABELS[exercise.kind] }}</span>
       <span class="chip bg-surface-2 text-ink-soft">{{ exercise.notion }}</span>
+      <span v-if="exercise.source" class="chip border border-line text-muted">{{ exercise.source }}</span>
       <span v-if="result?.correct" class="chip ml-auto bg-ok-soft text-ok"><CheckCircle2 :size="13" />Réussi</span>
       <span v-else-if="result" class="chip ml-auto bg-ko-soft text-ko">À retravailler</span>
     </div>

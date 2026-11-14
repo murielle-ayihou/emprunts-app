@@ -110,10 +110,10 @@ describe('Cas limites', () => {
     }
   })
 
-  it('amortissement constant non divisible : écart d’arrondi reporté sur la dernière échéance', () => {
+  it('amortissement constant non divisible : centimes répartis pour que le cumul suive C × p / n', () => {
     const s = buildSchedule({ capital: 10_000, ratePercent: 5, years: 3, method: 'amortissement-constant' })
-    expect(s.rows.map((r) => r.principal)).toEqual([3333.33, 3333.33, 3333.34])
-    expect(s.lastPaymentAdjustment).toBe(0.01)
+    expect(s.rows.map((r) => r.principal)).toEqual([3333.33, 3333.34, 3333.33])
+    expect(s.rows.map((r) => r.endBalance)).toEqual([6666.67, 3333.33, 0])
   })
 
   it('annuité constante : écart de la dernière échéance limité à 1 centime par échéance au maximum', () => {

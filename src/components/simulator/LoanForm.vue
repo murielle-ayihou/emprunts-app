@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { LIMITS, METHOD_LABELS, type LoanMethod, type LoanParams } from '@/services/loan'
+import { LIMITS, METHOD_LABELS, type LoanMethod, type LoanParams, type PeriodsPerYear } from '@/services/loan'
 import { Info } from 'lucide-vue-next'
 
 const model = defineModel<LoanParams>({ required: true })
@@ -68,10 +68,22 @@ const id = (s: string) => `${props.idPrefix}-${s}`
       </div>
     </fieldset>
 
-    <div>
-      <label :for="id('period')" class="font-semibold">Périodicité des échéances</label>
-      <select :id="id('period')" class="field mt-1.5" disabled aria-describedby="period-help"><option>Annuelle</option></select>
-      <p v-if="!compact" id="period-help" class="mt-1.5 flex gap-1.5 text-xs text-muted"><Info :size="14" class="mt-px shrink-0" />Le cours ne présente que des échéances annuelles : c'est le seul cas calculé ici. Les intérêts « capitalisés » (in fine) et le taux variable ne sont pas détaillés dans le support.</p>
+    <div class="grid gap-3" :class="compact ? '' : 'sm:grid-cols-2'">
+      <div>
+        <label :for="id('period')" class="font-semibold">Périodicité des échéances</label>
+        <select :id="id('period')" class="field mt-1.5" :value="model.periodsPerYear ?? 1" @change="update('periodsPerYear', Number(($event.target as HTMLSelectElement).value) as PeriodsPerYear)">
+          <option :value="1">Annuelle</option>
+          <option :value="2">Semestrielle</option>
+          <option :value="4">Trimestrielle</option>
+          <option :value="12">Mensuelle</option>
+        </select>
+      </div>
+      <label v-if="(model.periodsPerYear ?? 1) > 1" class="flex cursor-pointer items-start gap-2.5 self-end rounded-xl bg-surface-2/70 p-3 text-sm">
+        <input type="checkbox" class="mt-0.5 h-4 w-4 accent-[var(--capital)]" :checked="model.rateRounding === 'td'" @change="update('rateRounding', ($event.target as HTMLInputElement).checked ? 'td' : 'exact')" />
+        <span>Arrondir le taux périodique à 3 décimales, comme la correction du TD n°5</span>
+      </label>
     </div>
+    <p v-if="!compact && (model.periodsPerYear ?? 1) > 1" class="flex gap-1.5 text-xs text-muted"><Info :size="14" class="mt-px shrink-0" />Taux équivalent : (1 + i)^(1/k) − 1, comme dans le TD n°5. Le cours magistral ne présente que des échéances annuelles.</p>
+    <p v-if="!compact" class="flex gap-1.5 text-xs text-muted"><Info :size="14" class="mt-px shrink-0" />Taux fixe uniquement. Les intérêts « capitalisés » (in fine) et le taux variable ne sont pas détaillés dans le support.</p>
   </div>
 </template>

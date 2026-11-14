@@ -12,11 +12,11 @@ const totalCredit = props.entry.lines.reduce((s, l) => s + (l.credit ?? 0), 0)
   <figure class="overflow-hidden rounded-2xl border border-line bg-surface">
     <figcaption v-if="title" class="border-b border-line px-4 py-2.5 text-sm font-semibold">{{ title }}</figcaption>
     <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Écriture au journal">
-      <table class="w-full min-w-[520px] border-collapse text-sm">
+      <table class="w-full min-w-[540px] border-collapse text-sm">
         <thead>
           <tr class="text-left text-xs text-muted">
-            <th scope="col" class="w-16 px-3 pb-1 pt-3 font-semibold">Débit</th>
-            <th scope="col" class="w-16 px-3 pb-1 pt-3 font-semibold">Crédit</th>
+            <th scope="col" class="w-[4.5rem] px-3 pb-1 pt-3 font-semibold">Débit</th>
+            <th scope="col" class="w-[4.5rem] px-3 pb-1 pt-3 font-semibold">Crédit</th>
             <th scope="col" class="px-3 pb-1 pt-3 font-semibold">Libellé</th>
             <th scope="col" class="w-28 px-3 pb-1 pt-3 text-right font-semibold">Débit (€)</th>
             <th scope="col" class="w-28 px-3 pb-1 pt-3 text-right font-semibold">Crédit (€)</th>
@@ -27,11 +27,11 @@ const totalCredit = props.entry.lines.reduce((s, l) => s + (l.credit ?? 0), 0)
             <td colspan="5" class="px-3 pb-1 pt-2 text-center text-xs text-muted">{{ entry.date }}</td>
           </tr>
           <tr v-for="(l, i) in entry.lines" :key="i">
-            <td class="num px-3 py-1.5 font-bold text-ink">{{ l.debitAccount }}</td>
-            <td class="num px-3 py-1.5 font-bold text-ink">{{ l.creditAccount }}</td>
+            <td class="num whitespace-nowrap px-3 py-1.5 font-bold text-ink">{{ l.debitAccount }}</td>
+            <td class="num whitespace-nowrap px-3 py-1.5 font-bold text-ink">{{ l.creditAccount }}</td>
             <td class="px-3 py-1.5" :class="l.creditAccount ? 'pl-12 text-ink-soft' : 'text-ink'">{{ l.label }}</td>
-            <td class="num px-3 py-1.5 text-right" :class="l.debitAccount === '661' ? 'text-interest font-semibold' : l.debitAccount === '164' ? 'text-capital font-semibold' : 'text-ink'">{{ l.debit !== undefined ? formatAmount(l.debit) : '' }}</td>
-            <td class="num px-3 py-1.5 text-right text-ink">{{ l.credit !== undefined ? formatAmount(l.credit) : '' }}</td>
+            <td class="num whitespace-nowrap px-3 py-1.5 text-right" :class="l.debitAccount === '661' ? 'text-interest font-semibold' : l.debitAccount === '164' ? 'text-capital font-semibold' : 'text-ink'">{{ l.debit !== undefined ? formatAmount(l.debit) : '' }}</td>
+            <td class="num whitespace-nowrap px-3 py-1.5 text-right text-ink">{{ l.credit !== undefined ? formatAmount(l.credit) : '' }}</td>
           </tr>
           <tr>
             <td colspan="5" class="px-3 pb-3 pt-1 text-sm italic text-muted">{{ entry.description }}</td>
