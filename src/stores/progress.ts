@@ -224,6 +224,16 @@ export const useProgressStore = defineStore('progress', () => {
     return gained
   }
 
+  /** Séance d'entraînement au journal : XP selon les points obtenus, comme un quiz. */
+  function recordJournalSession(title: string, points: number, total: number): number {
+    const gained = quizXp(points, total)
+    if (gained > 0) addXp(gained, 'quiz', `Entraînement journal : ${title} (${points}/${total})`)
+    else markStudyDay()
+    updateAnswerStreak(total > 0 && points === total)
+    checkBadges()
+    return gained
+  }
+
   function recordSimulatorComparison() {
     const first = state.value.simulatorComparisons === 0
     state.value.simulatorComparisons++
@@ -286,6 +296,7 @@ export const useProgressStore = defineStore('progress', () => {
     resetExercise,
     recordQuizAttempt,
     recordSimulatorComparison,
+    recordJournalSession,
     bestScore,
     getAttempt,
     reset,

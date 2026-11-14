@@ -3,7 +3,7 @@ import { useRoute } from 'vue-router'
 import { navItems } from './navItems'
 import AppLogo from './AppLogo.vue'
 import QuickToggles from './QuickToggles.vue'
-import { Sigma, Settings, Layers } from 'lucide-vue-next'
+import { Sigma, Settings, Layers, FlaskConical } from 'lucide-vue-next'
 
 const route = useRoute()
 const items = navItems.filter((i) => i.mobile)
@@ -14,6 +14,7 @@ const items = navItems.filter((i) => i.mobile)
     <RouterLink to="/" aria-label="Cursus, retour au tableau de bord"><AppLogo /></RouterLink>
     <div class="flex items-center">
       <QuickToggles class="max-[380px]:hidden" />
+      <RouterLink to="/simulateur" class="grid h-10 w-10 place-items-center rounded-xl text-ink-soft hover:bg-surface-2" :class="{ 'text-ink bg-surface-2': route.path.startsWith('/simulateur') }" aria-label="Le labo"><FlaskConical :size="19" /></RouterLink>
       <RouterLink to="/revision" class="grid h-10 w-10 place-items-center rounded-xl text-ink-soft hover:bg-surface-2" :class="{ 'text-ink bg-surface-2': route.path.startsWith('/revision') }" aria-label="Révision flash"><Layers :size="19" /></RouterLink>
       <RouterLink to="/memo" class="grid h-10 w-10 place-items-center rounded-xl text-ink-soft hover:bg-surface-2" :class="{ 'text-ink bg-surface-2': route.path.startsWith('/memo') }" aria-label="Mémo des formules"><Sigma :size="19" /></RouterLink>
       <RouterLink to="/reglages" class="grid h-10 w-10 place-items-center rounded-xl text-ink-soft hover:bg-surface-2" :class="{ 'text-ink bg-surface-2': route.path.startsWith('/reglages') }" aria-label="Réglages"><Settings :size="19" /></RouterLink>
