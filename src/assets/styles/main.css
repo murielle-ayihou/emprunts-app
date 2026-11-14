@@ -1,0 +1,270 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/manrope';
+@import 'katex/dist/katex.min.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Identité « Échéance » — un carnet de comptes moderne.
+ * Code couleur constant dans toute l'application :
+ *   capital / amortissement → sarcelle   |   intérêts → corail   |   annuité → encre   |   récompenses → laiton
+ */
+:root {
+  --paper: #f3f5f2;
+  --surface: #ffffff;
+  --surface-2: #e9ede8;
+  --line: #d6ddd6;
+  --ink: #14284b;
+  --ink-soft: #3d4f6e;
+  --muted: #5d6b80;
+  --capital: #11806f;
+  --capital-soft: #d7efe9;
+  --interest: #c93d5f;
+  --interest-soft: #f8dde4;
+  --brass: #b9781a;
+  --brass-bright: #e9a23b;
+  --brass-soft: #f8ead2;
+  --deep: #14284b;
+  --on-deep: #f3f5f2;
+  --focus: #2f6fdd;
+  --ok: #138a5a;
+  --ok-soft: #d9f1e5;
+  --ko: #c23b3b;
+  --ko-soft: #f8dfdf;
+  color-scheme: light;
+}
+
+.dark {
+  --paper: #0d1729;
+  --surface: #14213a;
+  --surface-2: #1b2a46;
+  --line: #2a3b5c;
+  --ink: #eaf0fa;
+  --ink-soft: #c2cee2;
+  --muted: #8d9cb6;
+  --capital: #3cc2ab;
+  --capital-soft: #123b3b;
+  --interest: #f07592;
+  --interest-soft: #46203a;
+  --brass: #f0b453;
+  --brass-bright: #f0b453;
+  --brass-soft: #3b2f1c;
+  --deep: #22365c;
+  --on-deep: #eaf0fa;
+  --focus: #7aa7ff;
+  --ok: #43c98c;
+  --ok-soft: #133a2e;
+  --ko: #f07a7a;
+  --ko-soft: #432128;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Manrope Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
+  --color-capital: var(--capital);
+  --color-capital-soft: var(--capital-soft);
+  --color-interest: var(--interest);
+  --color-interest-soft: var(--interest-soft);
+  --color-brass: var(--brass);
+  --color-brass-bright: var(--brass-bright);
+  --color-brass-soft: var(--brass-soft);
+  --color-deep: var(--deep);
+  --color-on-deep: var(--on-deep);
+  --color-focus: var(--focus);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-ko: var(--ko);
+  --color-ko-soft: var(--ko-soft);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    font-feature-settings: 'tnum' 0;
+    line-height: 1.6;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-ink;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    font-variation-settings: 'opsz' 48;
+  }
+  :focus-visible {
+    outline: 2.5px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  ::selection {
+    background: var(--brass-soft);
+  }
+  input[type='number']::-webkit-inner-spin-button {
+    opacity: 0.4;
+  }
+}
+
+@utility num {
+  font-variant-numeric: tabular-nums;
+}
+@utility panel {
+  @apply bg-surface border border-line rounded-[20px];
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold select-none disabled:opacity-50 disabled:pointer-events-none;
+  transition-property: transform, background-color, color, box-shadow, border-color, filter;
+  transition-duration: 160ms;
+  &:active {
+    transform: translateY(1px) scale(0.98);
+  }
+}
+@utility btn-primary {
+  @apply btn bg-ink text-paper hover:shadow-[0_6px_18px_-6px_rgba(20,40,75,0.55)];
+}
+@utility btn-brass {
+  @apply btn text-[#2b1a00] hover:brightness-105;
+  background: var(--brass-bright);
+}
+@utility btn-ghost {
+  @apply btn border border-line bg-surface text-ink hover:bg-surface-2;
+}
+@utility btn-quiet {
+  @apply btn text-ink-soft hover:bg-surface-2 hover:text-ink;
+}
+@utility field {
+  @apply w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-ink outline-none transition placeholder:text-muted/70 focus:border-focus focus:ring-3 focus:ring-focus/20 disabled:opacity-70;
+}
+@utility chip {
+  @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+}
+@utility prose-lesson {
+  @apply text-[1.0625rem] text-ink-soft;
+  line-height: 1.7;
+  & strong {
+    @apply text-ink font-semibold;
+  }
+}
+
+/* KaTeX : hériter de la couleur du thème */
+.katex {
+  font-size: 1.08em;
+  color: inherit;
+}
+.katex-display {
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0;
+}
+
+/* Transitions de pages et d'éléments */
+.page-enter-active,
+.page-leave-active {
+  transition:
+    opacity 200ms ease,
+    transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-leave-to {
+  opacity: 0;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition:
+    opacity 220ms ease,
+    transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.slide-enter-from {
+  opacity: 0;
+  transform: translateX(24px);
+}
+.slide-leave-to {
+  opacity: 0;
+  transform: translateX(-24px);
+}
+
+.pop-enter-active {
+  animation: pop-in 420ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.pop-leave-active {
+  transition: opacity 200ms ease;
+}
+.pop-leave-to {
+  opacity: 0;
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-5px);
+  }
+  40%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+.anim-shake {
+  animation: shake 360ms ease;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0, -20px, 0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--dx), 110vh, 0) rotate(var(--rot));
+    opacity: 0.9;
+  }
+}
+
+html.theme-transition,
+html.theme-transition * {
+  transition:
+    background-color 300ms ease,
+    border-color 300ms ease,
+    color 300ms ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
